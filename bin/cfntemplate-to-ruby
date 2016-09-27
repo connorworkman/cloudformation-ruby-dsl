@@ -136,12 +136,32 @@ def pprint_cfn_template(tpl)
 end
 
 def pprint_cfn_section(section, name, options)
+  defaultExists = false
+  if section == 'parameter'  
+    options.each do |k, v|
+      if k == "Default"
+        defaultExists = true
+      end
+    end
+    unless defaultExists
+      puts "  puts \"Please enter a default value for parameter '#{name}:'\""
+      puts "  #{name} = $stdin.gets.chomp"
+    end
+  end
   print "  #{section} #{fmt_string(name)}"
   indent = '  ' + (' ' * section.length) + ' '
+
   options.each do |k, v|
     puts ","
     print indent, fmt_key(k), " => "
     pprint_value v, indent
+  end
+  if section == 'parameter'
+    unless defaultExists
+      puts ","
+      print indent, fmt_key("Default"), " => "
+      print "#{name}", indent
+    end
   end
   puts
   puts
